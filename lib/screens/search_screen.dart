@@ -22,8 +22,17 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _search() {
     final query = _searchController.text.trim();
-    if (query.isEmpty) return;
-    setState(() => _resultsFuture = MealDbService.searchRecipes(query));
+
+    if (query.isEmpty) {
+      setState(() {
+        _resultsFuture = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _resultsFuture = MealDbService.searchRecipes(query);
+    });
   }
 
   @override
@@ -42,7 +51,17 @@ class _SearchScreenState extends State<SearchScreen> {
             TextField(
               controller: _searchController,
               textInputAction: TextInputAction.search,
+
+              onChanged: (value) {
+                if (value.isEmpty) {
+                  setState(() {
+                    _resultsFuture = null;
+                  });
+                }
+              },
+
               onSubmitted: (_) => _search(),
+
               decoration: InputDecoration(
                 hintText: 'Search chicken, pasta, rice...',
                 prefixIcon: const Icon(Icons.search),
@@ -70,7 +89,13 @@ class _SearchScreenState extends State<SearchScreen> {
                         }
 
                         if (snapshot.hasError) {
-                          return Center(child: Text('Error: ${snapshot.error}'));
+                          print("SEARCH ERROR: ${snapshot.error}");
+                          return SingleChildScrollView(
+                            child: Text(
+                              snapshot.error.toString(),
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          );
                         }
 
                         final recipes = snapshot.data ?? [];

@@ -50,6 +50,34 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) setState(() => _loading = false);
     }
   }
+  Future<void> _forgotPassword() async {
+    if (_email.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter your email first'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(
+        email: _email.text.trim(),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password reset email sent'),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? 'Error sending reset email'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +127,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _loading ? null : _login,
                     child: Text(_loading ? 'Logging in...' : 'Login'),
                   ),
+                  SizedBox(height: 10,),
+                  TextButton(
+                    onPressed: _forgotPassword,
+                    child: const Text('Forgot Password?'),
+                  ),
+                  SizedBox(height: 10,),
                   TextButton(
                     onPressed: () {
                       Navigator.push(
